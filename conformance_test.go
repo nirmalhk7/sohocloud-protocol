@@ -256,7 +256,7 @@ func testLeanCI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read ci.yml: %v", err)
 	}
-	for _, want := range []string{"go test ./...", "reproduce_spec.py"} {
+	for _, want := range []string{"go test ./...", "reproduce_spec.py", "python testdata/reproduce_responses.py"} {
 		if !strings.Contains(string(ci), want) {
 			t.Errorf("ci.yml no longer runs %q: the dependency audit must run in CI", want)
 		}

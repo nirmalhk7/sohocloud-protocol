@@ -7,6 +7,34 @@
     "accept": true
   },
   {
+    "name": "jobs object has the wrong shape",
+    "method": "jobs",
+    "body": "{}",
+    "limit": 0,
+    "accept": false
+  },
+  {
+    "name": "jobs array entries must be assignments",
+    "method": "jobs",
+    "body": "[42]",
+    "limit": 0,
+    "accept": false
+  },
+  {
+    "name": "jobs array with one assignment",
+    "method": "jobs",
+    "body": "[{\"JobID\":\"job\"}]",
+    "limit": 0,
+    "accept": true
+  },
+  {
+    "name": "jobs nil slice",
+    "method": "jobs",
+    "body": "null",
+    "limit": 0,
+    "accept": true
+  },
+  {
     "name": "jobs exact",
     "method": "jobs",
     "body": "[]",
@@ -68,6 +96,13 @@
     "body": "{}",
     "limit": 2,
     "accept": true
+  },
+  {
+    "name": "fees array has the wrong shape",
+    "method": "fees",
+    "body": "[]",
+    "limit": 0,
+    "accept": false
   },
   {
     "name": "fees unknown field",

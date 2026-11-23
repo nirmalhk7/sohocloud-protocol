@@ -5,12 +5,33 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/NTARI-RAND/sohocloud-protocol/employment"
+	"github.com/NTARI-RAND/sohocloud-protocol/fees"
 	"github.com/NTARI-RAND/sohocloud-protocol/transport/httpjson"
 )
+
+func TestHandlerEncodesOneSuccessfulDocument(t *testing.T) {
+	at := time.Unix(1_700_000_000, 0).UTC()
+	handler := httpjson.Handler(&recordingCoordinator{
+		jobs: []employment.Assignment{{JobID: "job", OfferedAt: at}},
+		fees: fees.FeeDeclaration{EffectiveAt: at},
+	})
+	for _, path := range []string{"/v0/jobs?node_id=node", "/v0/fees"} {
+		t.Run(path, func(t *testing.T) {
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, path, nil))
+			if response.Code != http.StatusOK || !json.Valid(response.Body.Bytes()) {
+				t.Fatalf("status=%d body=%q; want one complete JSON value", response.Code, response.Body)
+			}
+		})
+	}
+}
 
 // Removing EOF validation would allow a second value or junk.
 func TestClientCompleteResponse(t *testing.T) {

@@ -38,3 +38,5 @@ jobs:
       # what keeps the golden vectors honest for non-Go implementers.
       - name: Reproduce golden vectors from SPEC (Python, no Go)
         run: python testdata/reproduce_spec.py
+      - name: Check HTTP response vectors (Python, no Go)
+        run: python testdata/reproduce_responses.py

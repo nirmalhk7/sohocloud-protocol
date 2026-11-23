@@ -55,20 +55,27 @@ Depends on: the Go standard library. Nothing else — no other NTARI module, no 
 ## Reference response transport binding
 
 SPEC §7.1 binds successful JSON responses to exactly one complete document.
+`TestHandlerEncodesOneSuccessfulDocument` checks the coordinator's job and fee
+responses.
 `transport/httpjson/client.go` enforces EOF and discards partial results;
 `TestClientCompleteResponse`, `TestClientDoesNotReturnPartialResponse`, and
 `TestClientResponseVectors` check it. `MaxResponseBytes` is a local opt-in
 success-body budget, not a network-wide admission or job-count rule.
 `TestClientSuccessBudget`, `TestClientOverflowBeforeDecoding`,
-`TestClientResponseReadFailure`, `TestClientChunkedSignedResponse`, and
+`TestClientResponseReadFailure`, `TestClientResponseErrorWithFinalJSONBytes`,
+`TestClientChunkedSignedResponse`, and
 `TestClientCancellationWhileReadingResponse` cover bounded reads, cleanup,
-signature preservation, and cancellation. `vectors/reproduce_responses.py`
-independently checks the shared transport fixtures. Existing canonical signing
-vectors are regenerated unchanged and remain independently reproducible.
+signature preservation, and cancellation. CI runs
+`testdata/reproduce_responses.py` to independently check framing, operation
+shapes, and budgets against the shared fixtures. It also reproduces the
+existing canonical signing vectors.
 
 The proposed module release is **v0.4.0**. It is not published by this change;
 consumer dependency updates and clean tagged-module verification remain release
-gates. Signed message domains remain `v0`; no canonical field or signature changes.
+gates. The release also includes stricter verification of signed times.
+Use nonzero timestamps representable as signed 64-bit Unix nanoseconds, including
+in signed test fixtures. Signed message domains remain `v0`, and this framing
+change preserves the canonical fields and signatures.
 
 ## Product-specific notes (last, per the ordering rule)
 

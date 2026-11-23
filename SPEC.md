@@ -403,6 +403,10 @@ reference handler wires routes and JSON only and is not the authenticator.
 
 ### 7.1 Successful response framing and local byte budgets
 
+An HTTP+JSON coordinator MUST send exactly one complete JSON value in each
+successful `PollJobs` or `Fees` response. Only JSON whitespace (space, tab,
+carriage return, line feed) may follow that value before EOF.
+
 For responses decoded as JSON (`PollJobs` and `Fees`), the reference client
 MUST accept exactly one complete JSON value followed only by JSON whitespace
 (space, tab, carriage return, line feed) and EOF. It MUST reject a second value,

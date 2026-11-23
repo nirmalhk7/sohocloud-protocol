@@ -63,21 +63,30 @@ testdata/vectors.json cross-language conformance vectors (normative fixture; see
 - **Stub, not built:** `anchor/` — the witnessed employment-claim layer
   (open problem #6). Labeled as a stand-in; see its package doc.
 
-## License
+## Verification
 
-AGPL-3.0-or-later. `SPEC.md` is part of the commons: it exists to be read,
-reimplemented, and contested. A commons no one can read is a freedom no one can
-use.
+Run the complete suite, the reference transport's race checks, and both Python
+reproducers:
 
-*Network Theory Applied Research Institute, Inc. — 501(c)(3) — EIN 92-3047136 — info@ntari.org*
+```sh
+go test ./...
+go test -race ./transport/httpjson
+python3 testdata/reproduce_spec.py
+python3 testdata/reproduce_responses.py
+```
+
+The concurrent transport test checks every worker's operation, node ID and job
+ID, regardless of completion order, as well as the total fee requests.
 
 ## Successful response limits and migration
 
 The reference client rejects trailing JSON values or junk in `PollJobs` and
 `Fees` responses, including with its zero-value configuration. JSON whitespace
 and unknown object fields remain accepted. Failed decoding returns no partial
-result. This stricter framing is proposed for module release v0.4.0; it does not
-change canonical message bytes or the `/v0` endpoints.
+result. This stricter framing is proposed for module release v0.4.0 and
+preserves canonical message bytes and the `/v0` endpoints. The release also
+rejects zero or out-of-range timestamps during signature verification. Use
+nonzero times representable as signed 64-bit Unix nanoseconds in signed fixtures.
 
 To opt into a local success-body byte budget, set `MaxResponseBytes` on
 `httpjson.Client`. Zero keeps response size unbounded; negative values fail
@@ -96,17 +105,21 @@ a local `replace`. Existing deployments get no automatic byte budget; their
 owners choose one for their workloads. Framing failures and body-limit errors
 add no retry and do not establish whether an earlier request was applied.
 
-Transport conformance: `go test ./transport/httpjson -count=1` and
-`python3 vectors/reproduce_responses.py`. Canonical conformance remains
-`go test ./vectors` and `python3 testdata/reproduce_spec.py`.
-
 The consumer drafts upgrade from v0.1.0, whose listing and assignment canonical
 encodings differ from current main because of prior GPU/storage additions under
 existing `v0` domains. Mixed old/new agents, frontends/relays, and coordinators
 reject those signatures even when added fields are empty. Fees alone do not
 exercise that boundary. `testdata/legacy_v0_1_signatures.json` was signed and
 verified with the actual v0.1.0 module using a public all-zero test seed;
-`TestLegacySignaturesRequireCoordinatedMigration` records the candidate's
-rejection of both old signatures. This is evidence of incompatibility, not a
-migration implementation. Agree and verify the coordinated rollout before
+`TestLegacySignaturesRequireCoordinatedMigration` verifies both signatures
+against the v0.1.0 encodings and checks that current verifiers reject them.
+Agree and verify the coordinated rollout before
 consumer deployment; do not reinterpret persisted signatures in this patch.
+
+## License
+
+AGPL-3.0-or-later. `SPEC.md` is part of the commons: it exists to be read,
+reimplemented, and contested. A commons no one can read is a freedom no one can
+use.
+
+*Network Theory Applied Research Institute, Inc. — 501(c)(3) — EIN 92-3047136 — info@ntari.org*
